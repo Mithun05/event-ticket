@@ -1,0 +1,64 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Venue {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  capacity  Int
+  createdAt DateTime @default(now())
+
+  events Event[]
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  venueId     String
+  name        String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  venue  Venue   @relation(fields: [venueId], references: [id])
+  tickets Ticket[]
+}
+
+model Ticket {
+  id                String   @id @default(uuid())
+  eventId           String
+  ticketType        String
+  price             Decimal
+  totalQuantity     Int
+  availableQuantity Int
+  createdAt         DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id])
+  orders Order[]
+}
+
+model Order {
+  id            String   @id @default(uuid())
+  ticketId      String
+  customerEmail String
+  quantity      Int
+  totalAmount   Decimal
+  status        OrderStatus
+  createdAt     DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id])
+}
+
+enum OrderStatus {
+  RESERVED
+  PURCHASED
+  CANCELLED
+}
